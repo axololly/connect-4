@@ -1,11 +1,14 @@
-from typing import List, Literal
+import numpy as np
+from typing import List, Literal, NewType
 from enum import Enum
 
+Outcome = NewType("Outcome", int)
+
 class Outcomes(Enum):
-    P1_WIN = 1
-    P2_WIN = -1
-    NONE = False
-    DRAW = 0
+    P1_WIN: Outcome = 1
+    P2_WIN: Outcome = -1
+    NONE: Outcome = False
+    DRAW: Outcome = 0
 
 class Game:
     STARTING_BOARD = [[0 for _ in range(7)] for _ in range(6)]
@@ -27,7 +30,7 @@ class Game:
 
         return self.board
 
-    def is_game_over(self) -> Outcomes:
+    def is_game_over(self) -> Outcome:
         if not self.valid_moves():
             return Outcomes.DRAW
         
