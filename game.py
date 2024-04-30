@@ -1,5 +1,4 @@
-import numpy as np
-from typing import List, Literal, NewType
+from typing import List, NewType
 from enum import Enum
 
 Outcome = NewType("Outcome", int)
@@ -61,6 +60,20 @@ class Game:
                         return Outcomes.P1_WIN if line[0] == 1 else Outcomes.P2_WIN
         
         return Outcomes.NONE
+
+    def display_board(self, _print: bool = True) -> str:
+        new_board = "\n".join([
+            "".join(map(str, row)) \
+                .replace('0', '⬛') \
+                .replace('1', '🔴') \
+                .replace('2', '🟡')
+            for row in self.board
+        ])
+
+        if _print:
+            print(new_board)
+
+        return new_board
 
 board = [
     [0, 0, 0, 0, 0, 0, 0],
