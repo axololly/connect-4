@@ -61,7 +61,7 @@ class Negamax:
                     opp_lines_of_3 += 1 if self.contains([0, 2, 2], line) else 0
                     opp_lines_of_3 += 1 if self.contains([2, 2, 0], line) else 0
         
-        return (my_lines_of_3 - opp_lines_of_3)
+        return my_lines_of_3 - opp_lines_of_3
 
     def get_children(self, board: List[List[int]]) -> List[List[List[int]]]:
         children = []
