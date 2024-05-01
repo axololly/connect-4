@@ -1,4 +1,4 @@
-from typing import List, NewType
+from typing import List, NewType, Optional
 from enum import Enum
 
 Outcome = NewType("Outcome", int)
@@ -6,7 +6,7 @@ Outcome = NewType("Outcome", int)
 class Outcomes(Enum):
     P1_WIN: Outcome = 1
     P2_WIN: Outcome = -1
-    NONE: Outcome = False
+    NONE: Outcome = None
     DRAW: Outcome = 0
 
 class Game:
@@ -14,20 +14,17 @@ class Game:
     
     def __init__(self, board: List[List[int]] = None):
         self.board = board or self.STARTING_BOARD
-        self.current_player = 1
 
     def valid_moves(self) -> List[int]:
         return [i for i, piece in enumerate(self.board[0]) if piece == 0]
 
-    def place_counter(self, column: int) -> List[List[int]] | bool:
+    def place_counter(self, column: int, player: int) -> Optional[bool]:
         try:
             open_space = [i for i in range(6) if self.board[i][column] == 0][-1]
         except IndexError:
             return False
 
-        self.board[open_space][column] = self.current_player
-
-        return self.board
+        self.board[open_space][column] = player
 
     def is_game_over(self) -> Outcome:
         if not self.valid_moves():
@@ -61,10 +58,10 @@ class Game:
         
         return Outcomes.NONE
 
-    def display_board(self, _print: bool = True) -> str:
+    def display_board(self, _print: bool = False) -> str:
         new_board = "\n".join([
             "".join(map(str, row)) \
-                .replace('0', '⬛') \
+                .replace('0', '      ') \
                 .replace('1', '🔴') \
                 .replace('2', '🟡')
             for row in self.board
@@ -74,16 +71,3 @@ class Game:
             print(new_board)
 
         return new_board
-
-board = [
-    [0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0]
-]
-
-game = Game(board)
-
-print(game.is_game_over())
