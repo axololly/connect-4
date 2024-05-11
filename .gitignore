@@ -1,4 +1,9 @@
+a.py
+benchmark solver.py
+evaluate board.py
+old/
+pascal pons.py
+results.sql
 test.py
+x.py
 __pycache__/
-other.py
-test/
