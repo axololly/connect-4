@@ -1,3 +1,5 @@
+# will be updated later. not done yet
+
 from bitboard import Bitboard
 
 moves = '7675456251'
