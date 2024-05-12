@@ -49,14 +49,6 @@ class Bitboard:
         self.heights[column] += 1
         self.moves.append(column)
         self.counter += 1
-        
-        """
-        move = 1 << self.heights[column]
-        self.heights[column] += 1  # (1)
-        self.bitboards[self.counter & 1] ^= move  # (2)
-        self.moves.append(column)  # (3)
-        self.counter += 1
-        """
 
     def undoMove(self) -> None:
         col = self.moves.pop()
@@ -104,3 +96,6 @@ class Bitboard:
         self.counter = 0
         self.moves = []
         self.heights = [n * 7 for n in range(7)]
+    
+    def generate_key(self) -> Binary: # used for later in transposition table
+        return self.bitboards[0] ^ self.bitboards[1] ^ 0b1000000100000010000001000000100000010000001000000

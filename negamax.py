@@ -1,6 +1,8 @@
 from bitboard import Bitboard
 from heuristic import Heuristic
 
+move_order = [3, 2, 4, 1, 5, 0, 6]
+
 def negamax(board: Bitboard, depth: int, alpha: int, beta: int) -> int:
     board = board.copy()
 
@@ -11,8 +13,6 @@ def negamax(board: Bitboard, depth: int, alpha: int, beta: int) -> int:
         return 0
     
     if board.isWin():
-        # print("winning board:")
-        # print(repr(board))
         return (42 + 1 - board.counter) // 2 * (-1 if board.counter + 1 & 1 else 1)
     
     for x in board.getNextMoves():
@@ -21,14 +21,13 @@ def negamax(board: Bitboard, depth: int, alpha: int, beta: int) -> int:
     
     max_score = (42 - 1 - board.counter) // 2
     
-    if beta > max_score:
-        beta = max_score
+    beta = max(beta, max_score)
 
-        if alpha >= beta:
-            return beta
+    if beta <= alpha:
+        return beta
     
     for x in board.getNextMoves():
-        board.makeMove(x)
+        board.makeMove(move_order[x])
         score = -negamax(board, depth - 1, -beta, -alpha)
         board.undoMove()
         
@@ -41,14 +40,14 @@ def get_best_move(board: Bitboard, /, depth: int = 10) -> int:
     best_score = -float('inf')
     best_move = 0
 
-    all_scores = {}
+    # all_scores = {}
 
     for col in board.getNextMoves():
         board.makeMove(col)
         score = -negamax(board, depth, float('-inf'), float('inf'))
         board.undoMove()
 
-        all_scores[col] = score
+        # all_scores[col] = score
 
         # print(score, col)
 
@@ -56,5 +55,5 @@ def get_best_move(board: Bitboard, /, depth: int = 10) -> int:
             best_score = score
             best_move = col
     
-    print("All scores: ", all_scores)
+    # print("All scores: ", all_scores)
     return best_move
