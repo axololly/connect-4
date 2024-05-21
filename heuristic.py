@@ -1,14 +1,11 @@
 from bitboard import Bitboard
 
 class Heuristic:
-    times_run = 0
-
     def heuristic(self, board: Bitboard):
         if board.isWin():
             return (1 if board.counter % 2 == 0 else -1) * 1_000_000
         
         if len(board.moves) == 42:
-            print("draw")
             return 0
         
         score = 0
@@ -34,6 +31,4 @@ class Heuristic:
                     elif board.bitboards[1] & mask:
                         score += 100 / ((5 * abs(3 - col)) + (10 * abs(2.5 - row)))
 
-        self.times_run += 1
-
-        return score
+        return score # int(score)

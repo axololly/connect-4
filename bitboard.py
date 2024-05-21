@@ -1,11 +1,9 @@
-from typing import List, NewType, Self
+from typing import List, NewType
 from copy import deepcopy
 
 Binary = NewType('Binary', int)
 
 class Bitboard:
-    STARTING_POSITION = [[0 for _ in range(7)] for _ in range(6)]
-
     def __init__(self, *bitboards: Binary):
         self.bitboards: List[Binary] = list(bitboards)
 
@@ -81,15 +79,21 @@ class Bitboard:
         return moves
 
     def is_winning_move(self, move: int) -> bool:
-        separate_board = self.copy()
-        separate_board.makeMove(move)
-        is_winning = separate_board.isWin()
-        separate_board.undoMove()
+        self.makeMove(move)
+        is_winning = self.isWin()
+        self.undoMove()
         
         return is_winning
 
-    def copy(self) -> Self:
-        return deepcopy(self)
+    def copy(self):
+        # return deepcopy(self)
+        new_board = Bitboard(*self.bitboards)
+        
+        new_board.counter = self.counter
+        new_board.heights = self.heights
+        new_board.moves = self.moves
+
+        return new_board
     
     def clear(self) -> None:
         self.bitboards = [0, 0]
