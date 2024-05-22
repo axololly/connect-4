@@ -1,5 +1,4 @@
 from typing import List, NewType
-from copy import deepcopy
 
 Binary = NewType('Binary', int)
 
@@ -19,6 +18,8 @@ class Bitboard:
         self.heights = [n * 7 for n in range(7)]
         self.counter = 0
         self.moves = []
+    
+        self.bottom_mask = 0b1000000_1000000_1000000_1000000_1000000_10000001
     
     def __repr__(self) -> str:
         state = []
@@ -86,7 +87,6 @@ class Bitboard:
         return is_winning
 
     def copy(self):
-        # return deepcopy(self)
         new_board = Bitboard(*self.bitboards)
         
         new_board.counter = self.counter
@@ -102,4 +102,55 @@ class Bitboard:
         self.heights = [n * 7 for n in range(7)]
     
     def generate_key(self) -> Binary: # used for later in transposition table
-        return self.bitboards[0] ^ self.bitboards[1] ^ 0b1000000100000010000001000000100000010000001000000
+        return self.bitboards[0] ^ self.bitboards[1] ^ self.bottom_mask
+    
+# Used for later
+class Position(Bitboard):
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.board_mask = self.bottom_mask * ((1 << 6) - 1)
+    
+    def compute_winning_position(self, position: Binary, mask: Binary):
+        # vertical
+        r = (position << 1) & (position << 2) & (position << 3)
+
+        # horizontal
+        p = (position << 7) & (position << 14)
+        r |= p & (position << 21)
+        r |= p & (position >> 7)
+        p >>= 21
+        r |= p & (position << 7)
+        r |= p & (position >> 21)
+
+        # diagonal 1
+        p = (position << 6) & (position << 12)
+        r |= p & (position << 18)
+        r |= p & (position >> 6)
+        p >>= 18
+        r |= p & (position << 6)
+        r |= p & (position >> 18)
+
+        # diagonal 2
+        p = (position << 8) & (position << 16)
+        r |= p & (position << 24)
+        r |= p & (position >> 8)
+        p >>= 24
+        r |= p & (position << 8)
+        r |= p & (position >> 24)
+
+        return r & (self.board_mask ^ mask)
+    
+    def winning_position(self):
+        return self.compute_winning_position(
+            self.bitboards[self.counter & 1],     # current position
+            self.bitboards[0] ^ self.bitboards[1] # mask (both postions overlapped)
+        )
+
+    def possible(self):
+        return (self.bitboards[0] ^ self.bitboards[1] + self.bottom_mask) & self.board_mask
+
+    def can_win_next(self):
+        return self.winning_position() & self.possible()
+
+    def possible_non_losing_moves(self):
+        assert not self.can_win_next()

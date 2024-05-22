@@ -1,22 +1,32 @@
 from bitboard import Bitboard
-from heuristic import Heuristic
 from transposition_table import TranspositionTable
+from functools import lru_cache
 
 class Negamax:
     def __init__(self):
         self.trans_table = TranspositionTable()
         self.move_order = [3, 2, 4, 1, 5, 0, 6]
-        self.nodes_explored = 0
+    
+    def heuristic(self, board: Bitboard):
+        score = 0
 
-    def negamax(self, board: Bitboard, depth: int, alpha: int, beta: int) -> int:
+        for row in range(6):
+            for col in range(7):
+                mask = 1 << (col + row * 7)
+                    
+                if board.bitboards[0] & mask:
+                    score += 100 / ((5 * abs(3 - col)) + (10 * abs(2.5 - row)))
+                else: # board.bitboards[1] & mask:
+                    score -= 100 / ((5 * abs(3 - col)) + (10 * abs(2.5 - row)))
+
+        return score # int(score)
+    
+    @lru_cache(maxsize = 512)
+    def negamax(self, board: Bitboard, alpha: int, beta: int) -> int:
         board = board.copy()
-        self.nodes_explored += 1
 
         if search_score := self.trans_table.get(board):
             return search_score
-
-        if depth == 0:
-            return Heuristic().heuristic(board)
 
         if board.counter == 42:
             return 0
@@ -24,20 +34,17 @@ class Negamax:
         if board.isWin():
             return (42 + 1 - board.counter) // 2
         
-        for x in board.getNextMoves():
-            if board.is_winning_move(x):
-                return (42 + 1 - board.counter) // 2
-        
-        max_score = (42 - 1 - board.counter) // 2
-        
-        beta = max(beta, max_score)
+        beta = max(beta, (42 - 1 - board.counter) // 2)
 
         if beta <= alpha:
             return beta
         
         for x in board.getNextMoves():
+            if board.is_winning_move(x):
+                return (42 + 1 - board.counter) // 2
+        
             board.makeMove(self.move_order[x])
-            score = -self.negamax(board, depth - 1, -beta, -alpha)
+            score = -self.negamax(board, -beta, -alpha)
             board.undoMove()
             
             alpha = max(alpha, score)
@@ -46,15 +53,15 @@ class Negamax:
         
         return alpha
 
-    def get_best_move(self, board: Bitboard, /, depth: int = 10) -> int:
+    def get_best_move(self, board: Bitboard) -> int:
         board = board.copy()
         best_score = -float('inf')
         best_move = 0
 
         for col in board.getNextMoves():
             board.makeMove(col)
-            # score = -self.negamax(board, depth, float('-inf'), float('inf'))
-            score = -self.solve(board, depth)
+            score = -self.solve(board)
+            # score = -self.negamax(board, float('-inf'), float('inf'))
             board.undoMove()
 
             print(score, col)
@@ -65,7 +72,7 @@ class Negamax:
         
         return best_move
 
-    def solve(self, board: Bitboard, /, depth: int = 10, weak: bool = False) -> int:
+    def solve(self, board: Bitboard, /, weak: bool = False) -> int:
         minimum = -(42 - board.counter) // 2
         maximum = (43 - board.counter) // 2
 
@@ -76,12 +83,12 @@ class Negamax:
         while minimum < maximum:
             median = minimum + (maximum - minimum) // 2
 
-            if median <= 0 and minimum / 2 < median:
-                median = minimum / 2
-            elif median >= 0 and maximum / 2 > median:
-                median = maximum / 2
+            if median <= 0 and minimum // 2 < median:
+                median = minimum // 2
+            elif median >= 0 and maximum // 2 > median:
+                median = maximum // 2
             
-            score = -self.negamax(board, depth, median, median + 1)
+            score = -self.negamax(board, median, median + 1)
 
             if score <= median:
                 maximum = score

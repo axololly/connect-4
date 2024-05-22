@@ -19,7 +19,9 @@ CREATE TABLE IF NOT EXISTS results (
 )
 """)
 conn.execute("DELETE FROM results")
-conn.execute("UPDATE sqlite_sequence SET seq = 0 WHERE name = 'results'")
+# conn.execute("UPDATE sqlite_sequence SET seq = 0 WHERE name = 'results'")
+
+c = 0
 
 bb = Bitboard()
 
@@ -31,6 +33,11 @@ for file in files:
         lines = content.splitlines()
         
         for i, line in enumerate(lines):
+            c += 1
+
+            if c == 15:
+                exit()
+            
             bb.clear()
             moves, score = line.split(' ')
             
