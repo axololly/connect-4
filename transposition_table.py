@@ -1,5 +1,5 @@
 from bitboard import Bitboard
-from typing import Optional, Union
+from typing import Optional
 from collections import OrderedDict
 
 class TranspositionTable:
@@ -32,7 +32,7 @@ class TranspositionTable:
     def __len__(self) -> int:
         return len(self.interal_cache)
 
-    def insert(self, bitboard: Bitboard, evaluation: Union[int, float]) -> None:
+    def insert(self, bitboard: Bitboard, evaluation: int) -> None:
         """
         ### Explanation
         Inserts a key established from a Bitboard instance into the internal cache.

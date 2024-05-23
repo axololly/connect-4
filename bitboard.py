@@ -43,6 +43,10 @@ class Bitboard:
         
         return '\n'.join(state)
     
+    def __eq__(self, value: object) -> bool:
+        assert type(value) is Bitboard
+        return self.bitboards == value.bitboards
+    
     def makeMove(self, column: int) -> None:
         self.bitboards[self.counter % 2] ^= 1 << self.heights[column]
         self.heights[column] += 1

@@ -6,6 +6,7 @@ class Negamax:
     def __init__(self):
         self.trans_table = TranspositionTable()
         self.move_order = [3, 2, 4, 1, 5, 0, 6]
+        self.nodes_explored = 0
     
     def heuristic(self, board: Bitboard):
         score = 0
@@ -23,6 +24,8 @@ class Negamax:
     
     @lru_cache(maxsize = 512)
     def negamax(self, board: Bitboard, alpha: int, beta: int) -> int:
+        self.nodes_explored += 1
+        
         board = board.copy()
 
         if search_score := self.trans_table.get(board):
@@ -32,16 +35,16 @@ class Negamax:
             return 0
         
         if board.isWin():
-            return (42 + 1 - board.counter) // 2
+            return (43 - board.counter) // 2
         
-        beta = max(beta, (42 - 1 - board.counter) // 2)
+        beta = max(beta, (41 - board.counter) // 2)
 
         if beta <= alpha:
             return beta
         
         for x in board.getNextMoves():
             if board.is_winning_move(x):
-                return (42 + 1 - board.counter) // 2
+                return (43 - board.counter) // 2
         
             board.makeMove(self.move_order[x])
             score = -self.negamax(board, -beta, -alpha)
@@ -61,7 +64,6 @@ class Negamax:
         for col in board.getNextMoves():
             board.makeMove(col)
             score = -self.solve(board)
-            # score = -self.negamax(board, float('-inf'), float('inf'))
             board.undoMove()
 
             print(score, col)
