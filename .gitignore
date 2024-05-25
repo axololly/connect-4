@@ -9,9 +9,13 @@ new results.sql
 test.py
 x.py
 __pycache__/
+gui/
 transposition table.py
-calculate_some_shit_idk/
 opening_book.py
 opening.book
 thanks.txt
+benchmark solver.py
+test cases/
+results.txt
+improved_negamax.py
 .gitignore

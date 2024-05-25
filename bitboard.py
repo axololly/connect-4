@@ -15,9 +15,9 @@ class Bitboard:
         if len(self.bitboards) > 2:
             raise Exception("More than two bitboards were parsed as arguments.")
         
-        self.heights = [n * 7 for n in range(7)]
+        self.heights: List[int] = [n * 7 for n in range(7)]
         self.counter = 0
-        self.moves = []
+        self.moves: List[int] = []
     
         self.bottom_mask = 0b1000000_1000000_1000000_1000000_1000000_10000001
     
@@ -43,27 +43,24 @@ class Bitboard:
         
         return '\n'.join(state)
     
-    def __eq__(self, value: object) -> bool:
-        assert type(value) is Bitboard
-        return self.bitboards == value.bitboards
-    
     def makeMove(self, column: int) -> None:
-        self.bitboards[self.counter % 2] ^= 1 << self.heights[column]
+        # assert column in range(7)
+        # assert column in self.getNextMoves()
+
+        self.bitboards[self.counter & 1] ^= 1 << self.heights[column]
         self.heights[column] += 1
         self.moves.append(column)
         self.counter += 1
 
     def undoMove(self) -> None:
         col = self.moves.pop()
-        self.bitboards[self.counter % 2] ^= 1 << self.heights[col]
-        self.counter -= 1
         self.heights[col] -= 1
+        self.counter -= 1
+        self.bitboards[self.counter & 1] ^= 1 << self.heights[col]
 
     def isWin(self) -> bool:
-        bitboard = self.bitboards[(self.counter - 1) % 2]
-
+        bitboard = self.bitboards[(self.counter - 1) & 1]
         directions = [1, 7, 6, 8]
-        bb = None
 
         for direction in directions:
             bb = bitboard & (bitboard >> direction)
@@ -74,10 +71,14 @@ class Bitboard:
         return False
 
     def getNextMoves(self) -> List[int]:
-        moves: List[int] = []
+        moves = []
         TOP = 0b1000000_1000000_1000000_1000000_1000000_1000000_1000000
 
         for i in range(7):
+            # print('checking heights to see if they reached the top:')
+            # print(Bitboard(1 << self.heights[i] - 1))
+            # print()
+
             if TOP & (1 << self.heights[i]) == 0:
                 moves.append(i)
         
@@ -110,8 +111,8 @@ class Bitboard:
     
 # Used for later
 class Position(Bitboard):
-    def __init__(self, *args):
-        super().__init__(*args)
+    def __init__(self, *bitboards: Binary):
+        super().__init__(*bitboards)
         self.board_mask = self.bottom_mask * ((1 << 6) - 1)
     
     def compute_winning_position(self, position: Binary, mask: Binary):

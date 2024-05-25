@@ -6,7 +6,9 @@ class Negamax:
     def __init__(self):
         self.trans_table = TranspositionTable()
         self.move_order = [3, 2, 4, 1, 5, 0, 6]
+        
         self.nodes_explored = 0
+        # self.archive = []
     
     def heuristic(self, board: Bitboard):
         score = 0
@@ -25,41 +27,63 @@ class Negamax:
     @lru_cache(maxsize = 512)
     def negamax(self, board: Bitboard, alpha: int, beta: int) -> int:
         self.nodes_explored += 1
+        '''
+        self.archive.append(board)
+        
+        i = self.nodes_explored % 10
+        print(f"alpha: {alpha}  |  beta: {beta}")
+        print(f"board:")
+        print(board)
+        print(f"bitboards: {board.bitboards}")
+        print(f"moves: {board.moves}")
+        print(f"this is the {self.nodes_explored}{'rd' if i == 3 else 'nd' if i == 2 else 'st' if i == 1 else 'th'} node searched")
+        print(f"the heights are: {board.heights}")
+        print()
+        '''
         
         board = board.copy()
+        move_length = len(board.moves)
 
-        if search_score := self.trans_table.get(board):
-            return search_score
-
-        if board.counter == 42:
+        if move_length == 42:
             return 0
-        
-        if board.isWin():
-            return (43 - board.counter) // 2
-        
-        beta = max(beta, (41 - board.counter) // 2)
+
+        if search_scores := self.trans_table.get(board):
+            alpha, beta = search_scores['UB'], search_scores['LB']
+        else:
+            beta = max(beta, (41 - move_length) // 2)
 
         if beta <= alpha:
             return beta
         
-        for x in board.getNextMoves():
-            if board.is_winning_move(x):
-                return (43 - board.counter) // 2
+        next_moves = board.getNextMoves()
         
+        for x in range(7):
+            if self.move_order[x] not in next_moves:
+                continue
+
+            if board.is_winning_move(self.move_order[x]):
+                print(board)
+                print(f"winning move found: {self.move_order[x]}")
+                print(f"alpha: {alpha}  |  beta: {beta}")
+                print(f"given score: {(43 - move_length) // 2}")
+                print()
+
+                return (43 - move_length) // 2
+
             board.makeMove(self.move_order[x])
             score = -self.negamax(board, -beta, -alpha)
             board.undoMove()
             
             alpha = max(alpha, score)
 
-        self.trans_table.insert(board, alpha)
+        self.trans_table.insert(board, alpha, beta)
         
         return alpha
 
     def get_best_move(self, board: Bitboard) -> int:
-        board = board.copy()
+        # board = board.copy()
         best_score = -float('inf')
-        best_move = 0
+        best_move = None
 
         for col in board.getNextMoves():
             board.makeMove(col)
@@ -75,8 +99,8 @@ class Negamax:
         return best_move
 
     def solve(self, board: Bitboard, /, weak: bool = False) -> int:
-        minimum = -(42 - board.counter) // 2
-        maximum = (43 - board.counter) // 2
+        minimum = (-42 + len(board.moves)) // 2
+        maximum = (43 - len(board.moves)) // 2
 
         if weak:
             minimum = -1
