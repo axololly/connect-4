@@ -32,27 +32,26 @@ class TranspositionTable:
     def __len__(self) -> int:
         return len(self.interal_cache)
 
-    def insert(self, bitboard: Bitboard, upper_bound: int, lower_bound: int) -> None:
+    def insert(self, bitboard: Bitboard, alpha: int) -> None:
         """
         ### Explanation
         Inserts a key established from a Bitboard instance into the internal cache.
 
         ### Parameters
         - bitboard: `Bitboard` - the `Bitboard` instance.
-        - upper_bound: `int` - The upper bound evaluation given from the given `Bitboard` instance.
-        - lower_bound: `int` - The lower bound evaluation given from the given `Bitboard` instance.
+        - alpha: `int` - The upper bound evaluation given from the given `Bitboard` instance.
         """
 
         key = bitboard.generate_key()
 
         if key in self.interal_cache:
-            self.interal_cache[key] = {'UB': upper_bound, 'LB': lower_bound}
+            self.interal_cache[key] = alpha
             self.interal_cache.move_to_end(key)
         else:
             if len(self.interal_cache) == self.size:
                 self.interal_cache.popitem(last = False)
             
-            self.interal_cache[key] = {'UB': upper_bound, 'LB': lower_bound}
+            self.interal_cache[key] = alpha
     
     def get(self, bitboard: Bitboard) -> Optional[int]:
         """

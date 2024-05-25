@@ -8,7 +8,7 @@ NN = Negamax()
 
 def setup():
     bb = Bitboard()
-    cases = ['445566', '3153', '17516442226766']
+    cases = ['445566', '6146', '3153', '17516442226766']
     moves = cases[1]
 
     for move in moves:
